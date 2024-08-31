@@ -1,0 +1,67 @@
+# Database Statefulset, service and secrets
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-replica
+  namespace: ingress-nginx
+spec:
+  serviceName: mongo
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:latest
+        ports:
+        - name: mongod-port
+          containerPort: 27017
+        command: ["/bin/sh"]
+        args: ["-c", "mongod --replSet=rs0 --bind_ip_all"]
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+
+# Database service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: ingress-nginx
+  labels:
+    name: mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  clusterIP: None
+  selector:
+    app: mongo
+---
+
+# DB secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+  namespace: ingress-nginx
+type: Opaque
+data:
+  dbUsername: cm9vdA==
+  dbPassword: cGFzc3dvcmQ=

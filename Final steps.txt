@@ -1,0 +1,138 @@
+## Azure deployment
+
+##### AZURE Resource creation Steps #####
+
+# Use Azure kubernetes context
+kc config use-context invite-cluster
+
+1. Create RG: 
+az group create --name invite-rg --location australiaeast 
+
+
+2. Create container registry 
+
+# export environment variable for reuse
+export ACRNAME=inviteacr 
+
+az acr create --resource-group invite-rg --name $ACRNAME --sku Basic 
+
+
+3. Create kubernetes cluster 
+
+# Larger compue Standard_D4s_v3 
+az aks create --resource-group invite-rg --name invite-cluster --node-vm-size Standard_D4s_v3 --node-count 1 --generate-ssh-keys --attach-acr $ACRNAME 
+
+# Smaller compue Standard_D4s_v3 
+az aks create --resource-group invite-rg --name invite-cluster --node-vm-size Standard_D2s_v3 --node-count 1 --generate-ssh-keys --attach-acr $ACRNAME 
+
+#Connect to cluster 
+az aks get-credentials --resource-group invite-rg --name invite-cluster 
+
+
+##### Kubernetes cluster creation Steps #####
+
+App namespace: ingress-nginx
+1. Expose services
+kc apply -f azrdeployment.yaml
+
+2. Deploy database
+kc apply -f database.yaml
+
+3. Configure database to elect primary 
+
+3.1 Login to 0th replica  
+
+kc exec mongo-replica-0 -it -n ingress-nginx -- mongosh
+
+3.2 Run below to initiate replica set 
+
+# Three replicas
+rs.initiate( {
+_id: "rs0",
+members: [
+{ _id: 0, host: " mongo-replica-0.mongo:27017"},
+{ _id: 1, host: " mongo-replica-1.mongo:27017"},
+{ _id: 2, host: " mongo-replica-2.mongo:27017"}
+]
+})
+
+# Two replicas
+rs.initiate( {
+_id: "rs0",
+members: [
+{ _id: 0, host: " mongo-replica-0.mongo:27017"},
+{ _id: 1, host: " mongo-replica-1.mongo:27017"}
+]
+})
+ 
+
+3.3 Verify changes  
+
+rs.status() 
+
+#New primary should be selected 
+
+3.4 Now set up authenticationDatabase on primary node
+
+admin = db.getSiblingDB('admin');
+admin.createUser({ user: 'root', pwd: 'password', roles: [ { role: 'root', db: 'admin'}]});
+
+3.5 verify changes synced to secondary nodes
+
+----
+Optional:
+# add --auth flag to db yaml command and rerun below
+kc apply -f database.yaml
+----
+
+4. Add Horizontal pod autoscaler 
+kc apply -f hpa.yaml
+
+5. Create nginx Ingress controller from existing
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+6. Get external IP of ingress controller and update in all yaml files and use it to folllwing SSL and client image build
+
+kc get services -o wide -w -n ingress-nginx
+
+7. Generate AKS TLS self-signed certificates
+
+7.1 Generate self-signed certificates
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ztls.key -out ztls.crt -subj "/CN=myeventson.online" -addext "subjectAltName=DNS:myeventson.online"
+
+7.2 Generate base64 encoded key and crt. Copy each output and paste in tls-secret.yaml
+
+// BASE 64 ENCODING ON TERMINAL
+cat ztls.key | base64 
+echo "---"
+cat ztls.crt | base64 
+
+7.3 Apply TLS secret
+kc apply -f az-tls-secret.yaml
+
+8. Build and push container images to ACR(Azure container registry)
+
+Locate the main folder
+
+# server
+az acr build --registry $ACRNAME --image inviteapp/ivt-server:1 ./server/ 
+
+# client
+az acr build --registry $ACRNAME --image inviteapp/ivt-client:1 ./client/ --build-arg=NEXT_PUBLIC_API_URL=http://myeventson.online
+
+# developer
+az acr build --registry $ACRNAME --image inviteapp/ivt-dev:1 ./developers/
+
+----
+
+9. Deploy server, client and developer
+
+kc apply -f server.yaml
+kc apply -f client.yaml
+kc apply -f developer.yaml
+
+10. Apply Ingress Load balancer
+kc apply -f azingress.yaml 
+
+11. App is accessible to frontend at https://myeventson.online/app

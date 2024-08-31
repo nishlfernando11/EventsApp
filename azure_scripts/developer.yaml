@@ -1,0 +1,55 @@
+# Developer deployment and configMaps
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: developer-dp
+  name: developer
+  namespace: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: developer
+  template:
+    metadata:
+      labels:
+        app: developer
+    spec:
+      containers:
+      - image: inviteacr.azurecr.io/inviteapp/ivt-dev:1
+        name: developer
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: developer-conf
+              key: server_api_url
+        resources:
+          requests:
+            cpu: 75m
+            memory: 500Mi
+          limits:
+            cpu: 75m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 5
+---
+
+# developer configMap
+apiVersion: v1
+data:
+  server_api_url: 'https://myeventson.online/api'
+kind: ConfigMap
+metadata:
+  name: developer-conf
+  namespace: ingress-nginx

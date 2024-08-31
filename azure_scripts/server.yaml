@@ -1,0 +1,147 @@
+# Server deployment, configMaps and secrets
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: server-dp
+  name: server
+  namespace: ingress-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - image: inviteacr.azurecr.io/inviteapp/ivt-server:1
+        name: server
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3003
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /etc/secrets
+        - name: mongo-secret-volume
+          mountPath: /etc/mongosecrets
+        env:
+        - name: MONGO_ATLAS_URI
+          value: 'mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongo-replica-0.mongo:27017,mongo-replica-1.mongo:27017?replicaSet=rs0&authSource=admin'
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: dbUsername
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: dbPassword
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: port
+        - name: STRIPE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: stripe_key
+        - name: NODE_MAILER_USER
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: node_mailer_user
+        - name: NODE_MAILER_PASS
+          valueFrom:
+            secretKeyRef:
+              name: server-secret
+              key: node_mailer_pass
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: server-secret
+              key: jwt_secret
+        - name: FRONT_END_URL
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: front_end_url 
+        - name: DEV_END_URL
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: dev_end_url
+        # resources:
+        #   requests:
+        #     cpu: 40m
+        #     memory: 128Mi
+        #   limits:
+        #     cpu: 75m
+        #     memory: 128Mi 
+        resources:
+          requests:
+            cpu: 10m
+            memory: 128Mi
+          limits:
+            cpu: 75m
+            memory: 128Mi 
+        startupProbe:
+          httpGet:
+            path: /api
+            port: 3003
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /api
+            port: 3003
+          failureThreshold: 3
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api
+            port: 3003
+          failureThreshold: 5
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: server-secret  
+      - name: mongo-secret-volume
+        secret:
+          secretName: mongo-secret                   
+---
+
+# server configs
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-conf
+  namespace: ingress-nginx
+data:
+  port: '3003'
+  stripe_key: 'test'
+  node_mailer_user: 'theinviteappcrew@gmail.com' 
+  front_end_url: 'https://myeventson.online'
+  dev_end_url: 'https://myeventson.online/dev'
+---
+
+# Server secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: server-secret
+  namespace: ingress-nginx
+type: Opaque
+data:
+  jwt_secret: NjQ5MTlmMTVhZDdjZmI0MzcwOWY4MTRjNWQ5OTA5N2ViNjhlYTA2MGQ2MTcwYWI5NGNjN2U0YjYzMmQzMTk3ZDYwMTQ2Y2M2ZGMwODRiZjI5YTA3Y2E2MDQ1NWI4NDgzYzI3ZWVhYmIwNjQwZjMwZTlkODRjOTk1ZGEyYWU0NTM=
+  node_mailer_pass: UEAkJHcwcmRAdGVzdA==
+

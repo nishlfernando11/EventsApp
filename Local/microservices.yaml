@@ -1,0 +1,359 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+  namespace: ingress-nginx
+type: Opaque
+data:
+  dbUsername: cm9vdA== # base64 encoded "root"
+  dbPassword: cGFzc3dvcmQ= # base64 encoded "password"
+---
+# Sever 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: server-dp
+    env: dev
+    tier: back-end
+  name: server
+  namespace: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+      env: dev
+      tier: back-end
+  template:
+    metadata:
+      labels:
+        app: server
+        env: dev
+        tier: back-end
+    spec:
+      containers:
+      - image: ivt-server:3.32
+        name: server
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3003
+        volumeMounts:
+        - name: secret-volume
+          mountPath: /etc/secrets
+        - name: mongo-secret-volume
+          mountPath: /etc/mongosecrets
+        # startupProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3003
+        #   failureThreshold: 3
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 5
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3003
+        #   failureThreshold: 3
+        #   initialDelaySeconds: 3
+        #   periodSeconds: 5
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3003
+        #   failureThreshold: 5
+        #   initialDelaySeconds: 3
+        #   periodSeconds: 3 
+        resources:
+          requests:
+            cpu: 5m
+            memory: 50Mi
+          limits:
+            cpu: 50m
+            memory: 50Mi 
+        env:
+        - name: MONGO_ATLAS_URI
+          value: 'mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongo-replica-0.mongo:27017,mongo-replica-1.mongo:27017/invitedb?replicaSet=rs0&authSource=admin'
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: dbUsername
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: dbPassword
+        # - name: MONGO_ATLAS_URI
+        #   valueFrom:
+        #     configMapKeyRef:
+        #       name: server-conf
+        #       key: mongo_url
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: port
+        - name: STRIPE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: stripe_key
+        - name: NODE_MAILER_USER
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: node_mailer_user
+        - name: NODE_MAILER_PASS
+          valueFrom:
+            secretKeyRef:
+              name: server-secret
+              key: node_mailer_pass
+            # configMapKeyRef:
+            #   name: server-conf
+            #   key: node_mailer_pass 
+        - name: FRONT_END_URL
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: front_end_url 
+        - name: DEV_END_URL
+          valueFrom:
+            configMapKeyRef:
+              name: server-conf
+              key: dev_end_url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: server-secret
+              key: jwt_secret
+            # configMapKeyRef:
+            #   name: server-conf
+            #   key: jwt_secret 
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: server-secret  
+      - name: mongo-secret-volume
+        secret:
+          secretName: mongo-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: server
+    env: dev
+    tier: back-end
+  name: server-svc
+  namespace: ingress-nginx
+spec:
+  ports:
+  - name: 80-8080
+    port: 80
+    protocol: TCP
+    targetPort: 3003
+  selector:
+    app: server
+    env: dev
+    tier: back-end
+  type: NodePort
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: server-secret
+  namespace: ingress-nginx
+type: Opaque
+data:
+  jwt_secret: 'NjQ5MTlmMTVhZDdjZmI0MzcwOWY4MTRjNWQ5OTA5N2ViNjhlYTA2MGQ2MTcwYWI5NGNjN2U0YjYzMmQzMTk3ZDYwMTQ2Y2M2ZGMwODRiZjI5YTA3Y2E2MDQ1NWI4NDgzYzI3ZWVhYmIwNjQwZjMwZTlkODRjOTk1ZGEyYWU0NTM='
+  node_mailer_pass: UEAkJHcwcmRAdGVzdA==
+
+---
+apiVersion: v1
+data:
+  # mongo_url: 'mongodb://mongo-replica-0.mongo:27017,mongo-replica-1.mongo:27017,mongo-replica-2.mongo:27017/?replicaSet=rs0'
+  port: '3003'
+  stripe_key: 'test'
+  node_mailer_user: 'theinviteappcrew@gmail.com' 
+  # node_mailer_pass: 'P@$$w0rd@test' 
+  # jwt_secret: '8208616e82df44121b62fb54274ccb19ef8fe28cfe7194b71d73481f4b81f05d452948abc167094ca64c9d1d247929c44e386331606abffdd19eec4c1936cb39'
+  front_end_url: 'http://client-svc:80'
+  dev_end_url: 'http://developer-svc:80'
+kind: ConfigMap
+metadata:
+  name: server-conf
+  namespace: ingress-nginx
+---
+
+# Client 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: client-dp
+    env: dev
+    tier: front-end
+  name: client
+  namespace: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+      env: dev
+      tier: front-end
+  template:
+    metadata:
+      labels:
+        app: client
+        env: dev
+        tier: front-end
+    spec:
+      containers:
+      - image: ivt-client:5.1 #4.1
+        name: client
+        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          failureThreshold: 3
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          failureThreshold: 5
+          initialDelaySeconds: 3
+          periodSeconds: 3   
+        env:
+        - name: NEXT_PUBLIC_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: client-conf
+              key: front_end_app_url
+        - name: NEXT_PUBLIC_STRIPE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: client-conf
+              key: front_end_stripe_key
+        - name: NEXT_PUBLIC_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: client-conf
+              key: server_api_url                      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: client
+    env: dev
+    tier: front-end
+  name: client-svc
+  namespace: ingress-nginx
+spec:
+  ports:
+  - name: 80-8080
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: client
+    env: dev
+    tier: front-end
+  type: NodePort
+---
+apiVersion: v1
+data:
+  front_end_app_url: 'https://localhost/'
+  front_end_stripe_key: 'somekey'
+  server_api_url: 'https://localhost/api'
+kind: ConfigMap
+metadata:
+  name: client-conf
+  namespace: ingress-nginx
+
+---
+# Developer 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: developer-dp
+    env: dev
+    tier: front-end
+  name: developer
+  namespace: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: developer
+      env: dev
+      tier: front-end
+  template:
+    metadata:
+      labels:
+        app: developer
+        env: dev
+        tier: front-end
+    spec:
+      containers:
+      - image: ivt-developer:4.1
+        name: developer
+        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          failureThreshold: 3
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3000
+        #   failureThreshold: 5
+        #   initialDelaySeconds: 3
+        #   periodSeconds: 3 
+        env:
+        - name: REACT_APP_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: developer-conf
+              key: server_api_url
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: developer
+    env: dev
+    tier: front-end
+  name: developer-svc
+  namespace: ingress-nginx
+spec:
+  ports:
+  - name: 80-8080
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: developer
+    env: dev
+    tier: front-end
+  type: NodePort
+---
+apiVersion: v1
+data:
+  # server_api_url: 'http://server-svc:80'
+  server_api_url: 'http://localhost/api'
+kind: ConfigMap
+metadata:
+  name: developer-conf
+  namespace: ingress-nginx

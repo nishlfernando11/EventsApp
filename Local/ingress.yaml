@@ -1,0 +1,77 @@
+# ingress-resource.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ivt-ingress
+  namespace: ingress-nginx
+spec:
+  tls:
+  - hosts:
+    - tls-secret 
+    secretName: tls-certificate
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: client-svc
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: server-svc
+            port:
+              number: 80
+      - path: /dev
+        pathType: Prefix
+        backend:
+          service:
+            name: developer-svc
+            port:
+              number: 80
+
+
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: my-ingress
+# spec:
+#   tls:
+#   - hosts:
+#     - myapp.mydomain.com
+#     secretName: server-certificate
+#   rules:
+#   - host: myapp.mydomain.com
+#     http:
+#       paths:
+#       - pathType: Prefix
+#         path: "/"
+#         backend:
+#           service:
+#             name: server-dp
+#             port:
+#               number: 80
+
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: server-certificate
+# type: kubernetes.io/tls
+# data:
+#   tls.crt: base64-encoded-certificate
+#   tls.key: base64-encoded-key
+
+# apiVersion: v1
+# data:
+#   tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDVENDQWZHZ0F3SUJBZ0lVV1dzSmxjc05pUmZKRHF1U3IwTEJSY0tway9Vd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZERVNNQkFHQTFVRUF3d0piRzlqWVd4b2IzTjBNQjRYRFRJME1EVXlOakExTVRJd05Wb1hEVEkxTURVeQpOakExTVRJd05Wb3dGREVTTUJBR0ExVUVBd3dKYkc5allXeG9iM04wTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGCkFBT0NBUThBTUlJQkNnS0NBUUVBb08rTkk1cWs1RGRRVitRN2tNZVhuSytOV0h2TlRCL2RDSVZ2Sy9iOUF3UjYKdWdSYjk0d0xJZFVuaTZpdytseVJvc2RTQ2VGc1pxdTBaTHA3L3Q4WFBkMFFsWnN0WUNyTmJra3N3RmRvVit4WApHY3ArczhONEpuNlZVUW9MdWYzOTU3NjVxZmdveUgwaXpCY1l3YVRteTZzVUwzb0h6ckliemJWYmY3ZWJzRXlYCmxRVUxpVkhPNlR5bHhqVENDR2Z1enFCZE4zMTNxaUpwRnRGTmVuaDBTb0NPZUtkbDB5dkp3MFVFVlFkQ0lycjMKN0FLUlozZUs5S3RlMC9JSE9OeU15YmduWEpHNVYvaGVHc2lPQjRFQVJKM2cxRDZhOVB0VWM4YUV4OFlSKzNWaQo4RXlxYWdrQXVWOU4wVWdoUitjS3RhVHhjR2c4UFVZdThJL0x5TnFIL3dJREFRQUJvMU13VVRBZEJnTlZIUTRFCkZnUVVMRnFYZmVBdzU1Uy9ESERQYjNxdHVJWFJDWU13SHdZRFZSMGpCQmd3Rm9BVUxGcVhmZUF3NTVTL0RIRFAKYjNxdHVJWFJDWU13RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBTllXRApZNmE5UGZNNEJEZldBcE9ET1BtMVArL0R5NU1tQ1hrZGxMNjJaRklMdnZHZ3E0eGVDZXkxV3VnZTNZQzY0NWVRClB6UDJQTndRQ3gvczQxd2I5YU5xVk9JY1VaeVZSZGNzekZ3blpHQUM2SEpUUWNUakN6MjV1QUlYWDZMWVA4bGYKcVRjNVBlTURrNzZicGtXWTIxWkg4MXlCanNLaG5wUGlQWnNOdm80L2lpTytqMzdhL1daTXE3VWVCdWFSRndQUQpBTHV4ZmRSc3U0Mkc1L2RUb3orY0Jid3JxUC8yRGl6U3dtUEgyazVSNzBncTdTV09mZ29BYjVPVGcyWFFDMkFyClNPaXIyMDZmQ3lkdWNlMCt1eTUvMGprM05jT2RYcER2eTZNbXNzVXMybjc1TVMzRWFsSTBvei9KTW0veDdBYlMKYldxQnhvTThzUTNVQXh6QlRRPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+#   tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2QUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktZd2dnU2lBZ0VBQW9JQkFRQ2c3NDBqbXFUa04xQlgKNUR1UXg1ZWNyNDFZZTgxTUg5MEloVzhyOXYwREJIcTZCRnYzakFzaDFTZUxxTEQ2WEpHaXgxSUo0V3htcTdSawp1bnYrM3hjOTNSQ1ZteTFnS3MxdVNTekFWMmhYN0ZjWnluNnp3M2dtZnBWUkNndTUvZjNudnJtcCtDaklmU0xNCkZ4akJwT2JMcXhRdmVnZk9zaHZOdFZ0L3Q1dXdUSmVWQlF1SlVjN3BQS1hHTk1JSVorN09vRjAzZlhlcUlta1cKMFUxNmVIUktnSTU0cDJYVEs4bkRSUVJWQjBJaXV2ZnNBcEZuZDRyMHExN1Q4Z2M0M0l6SnVDZGNrYmxYK0Y0YQp5STRIZ1FCRW5lRFVQcHIwKzFSenhvVEh4aEg3ZFdMd1RLcHFDUUM1WDAzUlNDRkg1d3ExcFBGd2FEdzlSaTd3Cmo4dkkyb2YvQWdNQkFBRUNnZ0VBRFdrSXRML05INnN3U2JLZCtBbDVxN2ZCS205ZWd3cGdxN1lhdG1vbFdSd0YKY2Z5dEFTcXRQc3Q1T1J6OGFsQk9YbWNIZ2dWRHVDWjBxTFFWWXY2Si9FQ3dnaGJsS0E5SkFQaWQvd1VKajlJRQp6QVJnbkhBY1VmRFlWbUZrNnNHc1o2UXY2bWJnVnh4K1NzMWQ1YnpzOG1tMkMrSzZSZEgzbVNPVWxVYmlkVVU2CnIwcVNnNk9PczF1VTlJZTB3N0xaVW91eHdrakwwNzRMWlBlZVlZdzB2ZXBiekdHL3NWaG8yUkZ0MjBWNVBTODMKVnRpS1NFeWZJTU9sM3NLN1l1dndoUnBON1k2TitKNEliSGhXTEdtckhrZE5jU0ZMMzJjeXo2ZFJYWnB5dGRlTwppcEw1OE5Oc0Fta3Y2ZXEwcWZjRmF2bGR4bFZOMnhLM3BEYkdZb1FhTVFLQmdRRFpzV3ZpQ05YTFZTL0tpa2IwCm40YnZpWU5FYVUwbnZkR0ZXays0aXRvSFNMT1U0NU1XY09OTjJ3cTVCVDVKWUU3aUtGN1dUZGpkM2RIMU5VcnIKNFhVZGpHeU9ZaGJvUDdERXk5NlV2U3UybTNXZVNaSWtHYlAwdmhlYXd4TWN2N2Urbyt5emNOWDRnSTk3T1lVOApRd3VRQ2FEY04vc3lVMm1rOVg2ZDBxekhhUUtCZ1FDOVFWZUt6M2hqY3BEeGl1OFo1VGVVWHJWTGh6eUt4c1hYCjdDNHJjL2x5OUcrUGpvbWtVbnNDWUpqWnNacUo2TXM0OTNIOHlKS1B4Y0xWcDNBRXR6VUZKeUZiOHpEcG1wbVcKR05RQk9YYnIwRlBTazd1L0VBTllFMWJVYVU3RDUzMGVzTGRTS1A5dFpHWWxDODFHTmxRSDlrZlZTd2hpRXJaTQp6dTkrUC9FUEp3S0JnQTY0d09MNFZmejZOZEVzcUwvQ1NnM0k3dWVoZDJaSW4vSzB1TTl5Rkd5SnJodFRpSTdyCjgzTkFiT2syUVpBVXcwRG9HZ0hFSWZaZkdlUExSdFhNMlc2MklHRkFvT3Z6NHJCc1dSRVYrZTdQZEpUUHhPSk0KR3E5aWE1WTd1djhtdC9aY2Y1VmkvQlZpSEZIcEFlbWhYeGJPaitKVXB0Z3dhK1NMOVpRV3V6aUJBb0dBRUp1RwpTaGtRc0hGaVJML3pZV3RhNkRzelg1QmJnTFlXc0c3NlVqZllJUDFRT09IQ05GaEVrUjNXNit1STZ5Y3hoaXM0CnBuMFhWMlI4UjNGdEJBenJxeXNXNDFIQTdnN3lBVmptYWNFWUxYTlhsN2Y5RnJRYUJ3V1RiZ3BicmhkSFJJVXYKWVJkVjZzeVBwaHFXQmQ1SW0zWkNNWFpuSXV3UGNVZ0xmaUd3VHFzQ2dZQktoVXQ1bGJMTFNSSWQxbFF3eWFpbQpCU3ZlVmI4RTNXZWdGcjE2ZmdsSTdpczlaTnZaRzVVditFRXYvaVRFTFN4U3lBZHV5TFFlVkVpcXVuazJ6dEdVCnJBaU1SYXJvaHUxRjE4OHh1OGoyajgzZVhRWDlzeVpSR1FCQWgzcFJObVl6amsyWkZVRDZqa1YrdG9BZk5rMjcKSGhqSUt6bHA0T3EwL2d5Z3FPWWNQZz09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+# kind: Secret
+# metadata:
+#   name: tls-secret
+# type: kubernetes.io/tls
