@@ -1,17 +1,6 @@
-<h1 align="center"> InVITe | Event Management System</h1>
-<h3 align="center">Live at https://invite-onweb.vercel.app/</h3>
+<h1 align="center"> Event Management System</h1>
 Welcome to our automated event management system, where you can easily organize events, manage registrations, and book tickets, all with just a few clicks. This system provides a hassle-free experience for both event organizers and attendees, making event management a breeze.
 <br>
-
-<h1>Features 🎯</h1>
-<ul>
-<li><strong>Event Creation:</strong> Create and customize events with ease.</li>
-<li><strong>Registration Management:</strong> Allow attendees to register for events online.</li>
-<li><strong>Ticket Booking:</strong> Enable attendees to book tickets for events online.</li>
-<li><strong>Email Notifications:</strong> Send automated emails for event registrations and bookings, which are sent directly to attendees' email addresses.</li>
-<li><strong>Attendee Tracking:</strong> Keep track of attendees and monitor check-in and check-out times.</li>
-<li><strong>Admin Management:</strong> Product managers can add admins that can create and manage events.</li>
-</ul>
 
 <h1>Technologies Used</h1>
 <ul>
@@ -29,9 +18,7 @@ Our event management system is built on a microservice architecture. This allows
 <br>
 <h1>🚀 Getting Started (Locally)</h1>
 
-<h3>Download or clone the repository</h3>
-<p>You can download the zip file of the repository or use the following command in your terminal to clone the repository:</p>
-<pre><code class="language-bash">git clone https://github.com/d17012002/event-management</code></pre>
+
 <h3>Navigate to the project's root directory</h3>
 <p>Once you have downloaded or cloned the repository, navigate to the project's root directory. The project consists of three folders: client, server, and developer.</p>
 <h3>Install dependencies</h3>
@@ -71,55 +58,3 @@ Our event management system has three main components:
   <li><strong>Admin:</strong> Admins can log in to create events, view their events, and manage registrations for their events.</li>
   <li><strong>Developer:</strong> Developers can access the developer site to create new admins (later this feature will be available only to product managers).</li>
 </ul>
-
-<br>
-<h1>👥 Our Team</h1>
-Our team consists of:
-
-<ul>
-  <li><strong>Anurag Kumar Singh:</strong>  
-  Connect with Anurag on 
-  <a href="https://www.linkedin.com/in/anuragkumar17/">
-  LinkedIn
-  </a> and 
-  <a href="https://github.com/d17012002">
-  GitHub
-  </a>, or visit his 
-  <a href="https://d17012002.github.io/Protfolio-Sample/">
-  personal website
-  </a>.
-  </li>
-  <li><strong>Devanshu Yadav:</strong>
-  Connect with Devanshu on 
-  <a href="https://www.linkedin.com/in/devanshuyadav16/">
-  LinkedIn
-  </a> and 
-  <a href="https://github.com/devanshuyadav">
-  GitHub
-  </a>, or visit his 
-  <a href="https://devanshuyadav.vercel.app/">
-  personal website
-  </a>.
-  </li>
-  <li><strong>Saksham Gupta:</strong>
-  Connect with Saksham on 
-  <a href="https://www.linkedin.com/in/sakshguptavit/">
-  LinkedIn
-  </a> and 
-  <a href="https://github.com/sakshgupta">
-  GitHub
-  </a>, or visit his 
-  <a href="https://sakshgupta.vercel.app/">
-  personal website
-  </a>.
-  </li>
-</ul>
-<br>
-
-<h1>🙌 Contributions</h1>
-We welcome contributions to our project. If you have any suggestions or improvements, feel free to submit a pull request or open an issue.
-<br>
-<br>
-
-<h1>📜 License</h1>
-This project is licensed under the MIT License - see the LICENSE.md file for details.
