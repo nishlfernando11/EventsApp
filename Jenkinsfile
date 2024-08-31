@@ -17,8 +17,7 @@ pipeline {
                 echo 'Installing dependencises...'
                 echo 'Running npm install' // NPM for building node
                 echo 'Running webpack..'
-                echo 'Bundling: webpack --config webpack.config.js' // Bundle modules with 
-webpack
+                echo 'Bundling: webpack --config webpack.config.js' // Bundle modules with webpack
                 echo 'Running npm run build' // Build application
                 // build
                 sleep(2) //simulate build
@@ -27,8 +26,7 @@ webpack
         }
         stage('Unit and Integration Tests') {
             steps {
-                echo "Running unit tests and integration tests on 
-${env.TESTING_ENVIRONMENT}.."
+                echo "Running unit tests and integration tests on ${env.TESTING_ENVIRONMENT}.."
                 echo 'npm test' // npm test are running for Node.JS application
                 sleep(2) //simulate test run
                 sh 'echo "Unit/Integration tests complete!" > tests.log'
@@ -42,8 +40,7 @@ ${env.TESTING_ENVIRONMENT}.."
                     emailext(
                     to: 'nlfernando11@gmail.com',
                     subject: "Unit and Integration Tests: ${currentBuild.result}!",
-                    body: "Unit/Integration test run was completed for #${env.BUILD_NUMBER} on 
-TEST env: ${env.TESTING_ENVIRONMENT}. The test suit ${currentBuild.result}!",
+                    body: "Unit/Integration test run was completed for #${env.BUILD_NUMBER} on TEST env: ${env.TESTING_ENVIRONMENT}. The test suit ${currentBuild.result}!",
                     attachLog: true
                     )   
                 }
@@ -73,8 +70,7 @@ TEST env: ${env.TESTING_ENVIRONMENT}. The test suit ${currentBuild.result}!",
                     emailext(
                             to: 'nlfernando11@gmail.com',
                             subject: "Security Scan: ${currentBuild.result}!",
-                            body: "Security Scan was completed for #${env.BUILD_NUMBER} on 
-TEST env: ${env.TESTING_ENVIRONMENT}. Security Scan: ${currentBuild.result}!",
+                            body: "Security Scan was completed for #${env.BUILD_NUMBER} on TEST env: ${env.TESTING_ENVIRONMENT}. Security Scan: ${currentBuild.result}!",
                             attachLog: true
                          )
                 }
@@ -91,8 +87,7 @@ TEST env: ${env.TESTING_ENVIRONMENT}. Security Scan: ${currentBuild.result}!",
         }
         stage('Integration Tests on Staging') {
             steps {
-                echo "Running unit tests and integration tests on 
-${env.STAGING_ENVIRONMENT}.."
+                echo "Running unit tests and integration tests on ${env.STAGING_ENVIRONMENT}.."
                 echo 'npm test' //npm test are running for Node.JS application
                 sleep(3) //simulate test run
                 echo 'Unit/Integration tests complete!'
@@ -100,8 +95,7 @@ ${env.STAGING_ENVIRONMENT}.."
         }
         stage('Deploy to Production') {
             steps {
-                echo "Deploy the application to the production environment : 
-${env.PRODUCTION_ENVIRONMENT}"
+                echo "Deploy the application to the production environment : ${env.PRODUCTION_ENVIRONMENT}"
                 echo 'Deploying to Azure Compute cluster: PRODUCTION..'
                  // deploy
                  sleep(3) //simulate deployment
