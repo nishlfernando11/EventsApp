@@ -1,3 +1,6 @@
+This project is an extended version of https://github.com/sakshgupta/InVITe for learning purposes.
+Credits to original authors of https://github.com/sakshgupta/InVITe.
+
 <h1 align="center"> Event Management System</h1>
 Welcome to our automated event management system, where you can easily organize events, manage registrations, and book tickets, all with just a few clicks. This system provides a hassle-free experience for both event organizers and attendees, making event management a breeze.
 <br>
