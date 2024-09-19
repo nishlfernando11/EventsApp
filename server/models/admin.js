@@ -30,27 +30,27 @@ const adminSchema = new mongoose.Schema(
 
 const Admin = mongoose.model("Admin", adminSchema);
 
-const test_credential = new Admin({
-    admin_id: "hqwkufywealufyewf.weiugbfre654wegreg",
-    email: "invite.testing@gmail.com",
-    name: "test",
-    pass: "invite123",
-});
+// const test_credential = new Admin({
+//     admin_id: "hqwkufywealufyewf.weiugbfre654wegreg",
+//     email: "invite.testing@gmail.com",
+//     name: "test",
+//     pass: "invite123",
+// });
 
-Admin.find(
-    { admin_id: "hqwkufywealufyewf.weiugbfre654wegreg" },
-    async function (err, docs) {
-        if (docs.length === 0) {
-            test_credential.save((error, success) => {
-                if (error) console.log(error);
-                else
-                    console.log(
-                        "Saved::Admin::test credentials",
-                        test_credential
-                    );
-            });
-        }
-    }
-);
+// Admin.find(
+//     { admin_id: "hqwkufywealufyewf.weiugbfre654wegreg" },
+//     async function (err, docs) {
+//         if (docs.length === 0) {
+//             test_credential.save((error, success) => {
+//                 if (error) console.log(error);
+//                 else
+//                     console.log(
+//                         "Saved::Admin::test credentials",
+//                         test_credential
+//                     );
+//             });
+//         }
+//     }
+// );
 
 module.exports = Admin;
