@@ -11,11 +11,11 @@ services:
 
   # Service for loading database fixtures.
   event-app-api:
-    image: nishani/eventapp-docker-comp
+    image: nishani/eventapp
     build:
-      context: ./event-app-docker-comp-container
+      context: ./event-app-container
       dockerfile: Dockerfile
-    container_name: event-app-docker-comp-container
+    container_name: event-app-container
     ports:
       - "3003:3003"
     environment:
