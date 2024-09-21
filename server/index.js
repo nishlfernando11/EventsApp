@@ -16,20 +16,20 @@ const eventRouter = require("./routes/eventRoutes");
 // const checkInRouter = require("./routes/checkInRoutes")
 
 dotenv.config();
-console.log("in index - ", process.env.MONGO_ATLAS_URI);
-//database url
-dbUrl = process.env.MONGO_ATLAS_URI.replace('${DB_USERNAME}',process.env.DB_USERNAME).replace('${DB_PASSWORD}', process.env.DB_PASSWORD)
-mongoose
-    .connect(dbUrl, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => {
-        console.log('Successfully connected to the database.')
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+// console.log("in index - ", process.env.MONGO_ATLAS_URI);
+// //database url
+// dbUrl = process.env.MONGO_ATLAS_URI.replace('${DB_USERNAME}',process.env.DB_USERNAME).replace('${DB_PASSWORD}', process.env.DB_PASSWORD)
+// mongoose
+//     .connect(dbUrl, {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true,
+//     })
+//     .then(() => {
+//         console.log('Successfully connected to the database.')
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
 
 require("./models/otpAuth");
 require("./models/user");
@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const corsOptions = {
-    origin: [process.env.FRONT_END_URL, process.env.DEV_END_URL],
+    origin: [process.env.FRONT_END_URL || '', process.env.DEV_END_URL ||''],
     optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
   };
 
