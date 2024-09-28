@@ -192,24 +192,24 @@ pipeline {
 
             }
             
-        }
-        // stage('Approval') {
-        //     steps {
-        //         script {
-        //             def userInput = input(
-        //                 message: 'Permission to Release?', 
-        //                 ok: 'Yes, proceed', 
-        //                 submitter: 'admin',
-        //                 parameters: [choice(name: 'Approval', choices: ['Proceed', 'Abort'], description: 'Select an option')]
-        //             )
+        // }
+        // // stage('Approval') {
+        // //     steps {
+        // //         script {
+        // //             def userInput = input(
+        // //                 message: 'Permission to Release?', 
+        // //                 ok: 'Yes, proceed', 
+        // //                 submitter: 'admin',
+        // //                 parameters: [choice(name: 'Approval', choices: ['Proceed', 'Abort'], description: 'Select an option')]
+        // //             )
 
-        //             if (userInput == 'Proceed') {
-        //                 echo 'Approved, proceeding...'
-        //             } else {
-        //                 error 'Approval was denied, stopping the pipeline.'
-        //             }
-        //         }
-        //     }
+        // //             if (userInput == 'Proceed') {
+        // //                 echo 'Approved, proceeding...'
+        // //             } else {
+        // //                 error 'Approval was denied, stopping the pipeline.'
+        // //             }
+        // //         }
+        // //     }
         // }
         stage('Release') { // release to producttion environment
             steps {
@@ -234,6 +234,14 @@ EOF
             
         }
      
+    }
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
     }
   
 }
