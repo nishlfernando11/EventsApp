@@ -1,0 +1,13 @@
+version: "3"
+services:
+  event-app:
+    image: nishani/eventapp-client
+    build:
+      context: ./event-app-client-container
+      dockerfile: Dockerfile
+    container_name: event-app-client-container
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    restart: always
