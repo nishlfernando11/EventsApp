@@ -1,25 +1,13 @@
 version: "3"
 services:
-  # db:
-  #   image: mongo:4.2.0
-  #   container_name: db
-  #   ports:
-  #     - "27017:27017"
-  #   expose:
-  #     - "27017"
-  #   restart: always
-
-  # Service for loading database fixtures.
   event-app-api:
-    image: nishani/eventapp
+    image: nishani/eventapp-server
     build:
-      context: ./event-app-container
+      context: ./event-app-server-container
       dockerfile: Dockerfile
-    container_name: event-app-container
+    container_name: event-app-server-container
     ports:
       - "3003:3003"
     environment:
       - PORT=3003
-    # depends_on:
-    #   - db
     restart: always
