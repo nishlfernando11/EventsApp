@@ -24,7 +24,7 @@ pipeline {
 
     }
     stages {
-        stage('Build') {
+        stage('git Build') {
             parallel {
                 stage('checkout') {
                     steps {                    
